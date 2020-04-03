@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+flask-script = "*"
+flask-migrate = "*"
+psycopg2 = "*"
+flask-cors = "*"
+
+[requires]
+python_version = "3.7"
