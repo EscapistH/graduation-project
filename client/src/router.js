@@ -16,7 +16,7 @@ import MyPub from './components/demand/MyPub.vue'
 import MyCancel from './components/demand/MyCancel.vue'
 
 // 后台部分
-// TODO:管理界面开发
+import Admin from './components/admin/Admin.vue'
 
 Vue.use(Router)
 
@@ -36,7 +36,8 @@ const router = new Router({
             children: [
                 { path: '/demands', component: Demands, meta: { title: '疫情物资援助登记系统' } },
                 { path: '/my_pub_demands', component: MyPub },
-                { path: '/my_cancel_demands', component: MyCancel }
+                { path: '/my_cancel_demands', component: MyCancel },
+                { path: '/admin', component: Admin, meta: { title: '管理' } },
             ]
         },
     ],
