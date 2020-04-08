@@ -4,7 +4,7 @@
     <el-header>
       <!-- 左侧logo和名称 -->
       <div>
-        <img src="../assets/logo.png" class="home-logo" />
+        <img src="../../assets/logo.png" class="home-logo" />
         <span>疫情物资援助登记系统</span>
       </div>
       <!-- 导航栏 -->

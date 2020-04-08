@@ -8,7 +8,7 @@ import Login from './components/sign/Login.vue'
 import Register from './components/sign/Register.vue'
 
 // 主页(需求部分容器)部分
-import Home from './components/Home.vue';
+import Home from './components/home/Home.vue';
 
 // 需求部分
 import Demands from './components/demand/AllDemands.vue'
