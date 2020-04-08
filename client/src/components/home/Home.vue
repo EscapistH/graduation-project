@@ -64,11 +64,13 @@
             <el-button type="success" @click="do_publish">发布</el-button>
           </div>
         </el-dialog>
-        <!-- 退出按钮带完善个人信息的下拉框 -->
+        <!-- 下拉按钮组 -->
         <el-dropdown split-button type="info" @click="do_logout">
           退出
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item @click.native="open_personal_info_dialog">修改个人信息</el-dropdown-item>
+            <el-dropdown-item v-if="personal_info_form.role === 0" @click.native="go_admin">管理页面</el-dropdown-item>
+            <el-dropdown-item v-if="personal_info_form.role === 1" @click.native="go_review">管理页面</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
         <!-- 完善个人信息的dialog -->
@@ -153,7 +155,8 @@ export default {
         name: null,
         gender: null,
         phone: null,
-        email: null
+        email: null,
+        role: null
       },
       personal_info_form_rule: {
         name: [{ required: true, message: "请输入真实姓名", trigger: "blur" }],
@@ -172,6 +175,21 @@ export default {
   created() {
     this.get_user_info();
     this.active_path = window.sessionStorage.getItem("active_path");
+    // 检查是否完善个人信息
+    setTimeout(() => {
+      if (
+        (window.sessionStorage.getItem("token") !== null &&
+          this.personal_info_form.name === null) ||
+        (window.sessionStorage.getItem("token") !== null &&
+          this.personal_info_form.phone === null)
+      ) {
+        this.$notify.info({
+          title: "请完善个人信息",
+          message:
+            "您的个人信息还不完善，为了方便使用本系统，请在这里选择修改个人信息进行完善"
+        });
+      }
+    }, 2000);
   },
   methods: {
     do_logout() {
@@ -190,6 +208,12 @@ export default {
     },
     go_register() {
       this.$router.push("/register");
+    },
+    go_admin() {
+      this.$router.push("/admin");
+    },
+    go_review(){
+      this.$router.push("/review")
     },
     get_active_path(path) {
       window.sessionStorage.active_path = path;
