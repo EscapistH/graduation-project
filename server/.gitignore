@@ -13,3 +13,6 @@ build
 
 # idea
 .idea
+
+# 数据库数据迁移文件
+migrations
