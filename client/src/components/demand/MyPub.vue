@@ -43,11 +43,7 @@
                   :before-close="handle_close"
                   v-loading="is_modifying"
                 >
-                  <el-form
-                    :model="demand_by_id"
-                    label-width="8rem"
-                    :label-position="label_position"
-                  >
+                  <el-form :model="demand_by_id" label-width="8rem" label-position="left">
                     <el-form-item label="所属医院或单位">
                       <el-input v-model="demand_by_id.title"></el-input>
                     </el-form-item>
@@ -101,8 +97,7 @@ export default {
       modify_dialog_visible: false,
       is_loading_more: false,
       is_modifying: false,
-      is_canceling: false,
-      label_position: "left"
+      is_canceling: false
     };
   },
 
