@@ -70,7 +70,7 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item @click.native="open_personal_info_dialog">修改个人信息</el-dropdown-item>
             <el-dropdown-item v-if="personal_info_form.role === 0" @click.native="go_admin">管理页面</el-dropdown-item>
-            <el-dropdown-item v-if="personal_info_form.role === 1" @click.native="go_review">管理页面</el-dropdown-item>
+            <el-dropdown-item v-if="personal_info_form.role === 1" @click.native="go_review">审核页面</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
         <!-- 完善个人信息的dialog -->
@@ -177,12 +177,7 @@ export default {
     this.active_path = window.sessionStorage.getItem("active_path");
     // 检查是否完善个人信息
     setTimeout(() => {
-      if (
-        (window.sessionStorage.getItem("token") !== null &&
-          this.personal_info_form.name === null) ||
-        (window.sessionStorage.getItem("token") !== null &&
-          this.personal_info_form.phone === null)
-      ) {
+      if (window.sessionStorage.getItem("token") !== null && this.personal_info_form.name === null) {
         this.$notify.info({
           title: "请完善个人信息",
           message:
@@ -200,7 +195,6 @@ export default {
         message: "注销成功",
         type: "success"
       });
-      this.$router.push("/demands");
       this.$router.go(0);
     },
     go_login() {
@@ -212,8 +206,8 @@ export default {
     go_admin() {
       this.$router.push("/admin");
     },
-    go_review(){
-      this.$router.push("/review")
+    go_review() {
+      this.$router.push("/review");
     },
     get_active_path(path) {
       window.sessionStorage.active_path = path;
@@ -298,6 +292,7 @@ export default {
         this.personal_info_form.gender = res.data.data[0].gender;
         this.personal_info_form.phone = res.data.data[0].phone;
         this.personal_info_form.email = res.data.data[0].email;
+        this.personal_info_form.role = res.data.data[0].role;
       });
     }
   }
