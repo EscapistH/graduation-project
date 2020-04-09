@@ -17,6 +17,7 @@ import MyCancel from './components/demand/MyCancel.vue'
 
 // 后台部分
 import Admin from './components/admin/Admin.vue'
+import Review from './components/admin/Review.vue'
 
 Vue.use(Router)
 
@@ -38,6 +39,7 @@ const router = new Router({
                 { path: '/my_pub_demands', component: MyPub },
                 { path: '/my_cancel_demands', component: MyCancel },
                 { path: '/admin', component: Admin, meta: { title: '管理' } },
+                { path: '/review', component: Review, meta: { title: '审核' } }
             ]
         },
     ],
