@@ -61,7 +61,7 @@ def do_login():
         elif in_json['logby'] == 'phone':
             phone, password = in_json['username'], in_json['password']
             # 获取该用户的用户名
-            rs = db.session.execute('select u_nick from app.users where u_phone = :phone', {'phone': phone})
+            rs = db.session.execute('select u_nick from app.users where u_phone = :phone', {'phone': phone}).fetchall()
             if len(rs) == 0:
                 return ResponseResult.get_result('Error', [{'msg': '手机号或密码错误'}])
             username = rs[0][0]
