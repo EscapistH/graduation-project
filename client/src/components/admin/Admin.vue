@@ -21,10 +21,12 @@
           <el-table-column sortable prop="create_time" min-width="200" label="创建时间"></el-table-column>
           <el-table-column sortable prop="last_login_time" min-width="200" label="上次登录时间"></el-table-column>
           <el-table-column min-width="150" label="操作">
-            <el-button-group>
-              <el-button @click="reset_pwd(scope.row)" type="warning" size="mini">重置密码</el-button>
-              <el-button @click="del_user(scope.row)" type="danger" size="mini">删除</el-button>
-            </el-button-group>
+            <template slot-scope="scope">
+              <el-button-group>
+                <el-button @click="reset_pwd(scope.row)" type="warning" size="mini">重置密码</el-button>
+                <el-button @click="del_user(scope.row)" type="danger" size="mini">删除用户</el-button>
+              </el-button-group>
+            </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
@@ -144,8 +146,27 @@ export default {
     del_user() {
       console.log("del user");
     },
-    reset_pwd() {
-      console.log("reset pwd");
+    reset_pwd(row) {
+      console.log(row, row.id);
+      this.is_loading_users = true;
+      this.$http.put("/reset_pwd", { u_id: row.id }).then(
+        res => {
+          console.log(res);
+          if (res.data.code === 200) {
+            this.is_loading_users = false;
+            this.$message.success("密码已重置为 12345678，请及时修改");
+          }
+          if (res.data.code === 401) {
+            this.is_loading_demands = false;
+            this.$message.warning("登录已过期，请重新登录");
+            this.$router.push("/login");
+          }
+        },
+        () => {
+          this.is_loading_demands = false;
+          this.$message.error("提交失败，请重试");
+        }
+      );
     },
     pass_review(row) {
       this.is_loading_demands = true;
