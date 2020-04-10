@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 
 from flask import Blueprint, request
 
@@ -76,12 +77,34 @@ def update_user_by_id(uid):
     modify_time = datetime.datetime.now().replace(microsecond=0)
     if request.method == 'PUT':
         token, u_id = get_token_and_id()
-        if TokenOperate.check_token(token, u_id):
+        if not TokenOperate.check_token(token, u_id):
             return ResponseResult.get_result('Declined')
+        rs = db.session.execute('select u_phone from app.users where u_phone = :phone and u_id != :u_id',
+                                {'phone': phone, 'u_id': u_id}).fetchall()
+        if len(rs) >= 1:
+            return ResponseResult.get_result('Error', [{'msg': '手机号已存在'}])
         sql = '''update app.users
         set u_name = :u_name, u_gender = :u_gender, u_phone = :u_phone, u_email = :u_email, u_modify_time = :u_modify_time
         where u_id = :u_id
         '''
         db.session.execute(sql, {'u_name': name, 'u_gender': gender, 'u_phone': phone, 'u_email': email, 'u_id': uid,
                                  'u_modify_time': modify_time})
+        return ResponseResult.get_result('Success')
+
+
+@users.route('/reset_pwd', methods=['PUT'])
+def reset_user_password():
+    if request.method == 'PUT':
+        token, u_id = get_token_and_id()
+        if not TokenOperate.check_token(token, u_id):
+            return ResponseResult.get_result('Declined')
+        reset_u_id = request.json['u_id']
+        rs = db.session.execute('select u_nick, u_phone from app.users where u_id = :u_id',
+                                {'u_id': reset_u_id}).fetchall()
+        u_nick, u_phone = rs[0][0], rs[0][1]
+        sha256 = hashlib.sha256()
+        sha256.update((u_nick + '12345678' + u_phone + '5A!t').encode('utf-8'))
+        password_hash = sha256.hexdigest()
+        sql = 'update app.users set u_pwd = :pwd where u_id = :u_id'
+        db.session.execute(sql, {'pwd': password_hash, 'u_id': reset_u_id})
         return ResponseResult.get_result('Success')
