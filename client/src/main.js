@@ -14,7 +14,7 @@ import axios from 'axios'
 // 生产环境用
 axios.defaults.baseURL = 'http://bsapi.hxxl.world/api'
 // 开发环境用
-// axios.defaults.baseURL = 'http://localhost:5000/api'
+axios.defaults.baseURL = 'http://localhost:5000/api'
 // 请求时在请求头带上token和uid
 axios.interceptors.request.use(config => {
   // console.log(config)

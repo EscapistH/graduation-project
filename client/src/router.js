@@ -39,7 +39,7 @@ const router = new Router({
                 { path: '/my_pub_demands', component: MyPub },
                 { path: '/my_cancel_demands', component: MyCancel },
                 { path: '/admin', component: Admin, meta: { title: '管理' } },
-                { path: '/review', component: Review, meta: { title: '审核' } }
+                { path: '/review', component: Review, meta: { title: '需求审核' } }
             ]
         },
     ],
