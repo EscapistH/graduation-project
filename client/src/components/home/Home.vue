@@ -118,7 +118,9 @@
         <el-button type="primary" @click="go_register">去注册</el-button>
       </div>
     </el-header>
-    <router-view></router-view>
+    <router-view
+      :now_login_user_name="personal_info_form.name===null?personal_info_form.nick:personal_info_form.name"
+    ></router-view>
     <!-- 主体部分 -->
   </el-container>
 </template>
@@ -177,7 +179,10 @@ export default {
     this.active_path = window.sessionStorage.getItem("active_path");
     // 检查是否完善个人信息
     setTimeout(() => {
-      if (window.sessionStorage.getItem("token") !== null && this.personal_info_form.name === null) {
+      if (
+        window.sessionStorage.getItem("token") !== null &&
+        this.personal_info_form.name === null
+      ) {
         this.$notify.info({
           title: "请完善个人信息",
           message:
