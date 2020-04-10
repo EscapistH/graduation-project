@@ -289,6 +289,9 @@ def do_review():
             return ResponseResult.get_result('Declined')
         d_id = int(request.json['d_id'])
         reviewer = int(request.headers['uid'])
-        sql = 'update app.demands set d_is_review = true, d_reviewer = :reviewer where d_id = :d_id'
-        db.session.execute(sql, {'reviewer': reviewer, 'd_id': d_id})
+        review_time = datetime.datetime.now().replace(microsecond=0)
+        sql = '''
+        update app.demands set d_is_review = true, d_reviewer = :reviewer, d_review_time = :review_time where d_id = :d_id
+        '''
+        db.session.execute(sql, {'reviewer': reviewer, 'd_id': d_id, 'review_time':review_time})
         return ResponseResult.get_result('Success')
