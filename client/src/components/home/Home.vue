@@ -273,7 +273,6 @@ export default {
               this.personal_info_form
             )
             .then(res => {
-              console.log(res);
               if (res.data.code === 200) {
                 this.is_updating = false;
                 this.$message.success("修改成功");
@@ -284,6 +283,10 @@ export default {
                 this.personal_info_dialog_visible = false;
                 this.$message.waring("登录失效，请重新登录");
                 this.$router.push("/login");
+              }
+              if (res.data.code === 500) {
+                this.is_updating = false;
+                this.$message.error(res.data.data[0].msg);
               }
             })
             .catch(() => {});
