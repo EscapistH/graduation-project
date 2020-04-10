@@ -4,7 +4,12 @@
     <el-row :gutter="12" v-for="(each_row, index) in Math.ceil(demands.length/4)" :key="index">
       <!-- 列 -->
       <div v-if="demands.length === 0" style="text-align:center;">再怎么找也没有啦</div>
-      <el-col v-else v-for="(demand, id) in demands.slice(each_row,each_row+4)" :key="id" :span="6">
+      <el-col
+        v-else
+        v-for="(demand, id) in demands.slice((each_row-1)*4,each_row*4)"
+        :key="id"
+        :span="6"
+      >
         <!-- 卡片 -->
         <div class="card-box">
           <!-- 鼠标覆盖时出现卡片阴影 -->
