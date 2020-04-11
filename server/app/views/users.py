@@ -24,9 +24,9 @@ def get_users():
             if r[6] == 0:
                 role = '管理员'
             elif r[6] == 1:
-                role = '审核人员'
-            elif r[6] == 2:
                 role = '普通用户'
+            elif r[6] == 2:
+                role = '审核人员'
             data.append(
                 {
                     'id': r[0],
@@ -242,3 +242,14 @@ def do_register():
                 }
             )
             return ResponseResult.get_result('Success', [{'msg': '注册成功'}])
+
+
+@users.route('/set_reviewer', methods=['PUT'])
+def set_reviewer():
+    if request.method == 'PUT':
+        token, u_id = get_token_and_id()
+        if not TokenOperate.check_token(token, u_id):
+            return ResponseResult.get_result('Declined')
+        tgt_uid = request.json['new_reviewer']
+        db.session.execute('update app.users set u_role = 2 where u_id = :tgt_uid', {'tgt_uid': tgt_uid})
+        return ResponseResult.get_result('Success')
