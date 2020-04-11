@@ -25,13 +25,13 @@
               <el-popconfirm @onConfirm="reset_pwd(scope.row)" title="此操作会将密码重置为 12345678">
                 <el-button slot="reference" type="warning" size="mini">重置密码</el-button>
               </el-popconfirm>
-              <el-popconfirm
-                @onConfirm="del_user(scope.row)"
-                title="确认删除此用户吗？"
-                icon="el-icon-warning"
-                iconColor="red"
-              >
-                <el-button slot="reference" type="danger" size="mini">删除用户</el-button>
+              <el-popconfirm @onConfirm="set_reviewer(scope.row)" title="确认将此用户设置为审核人员吗？">
+                <el-button
+                  slot="reference"
+                  type="info"
+                  size="mini"
+                  :disabled="scope.row.role === '管理员'||scope.row.role === '审核人员'?true:false"
+                >设为审核</el-button>
               </el-popconfirm>
             </template>
           </el-table-column>
@@ -147,11 +147,26 @@ export default {
       let property = column["property"];
       return row[property] === value;
     },
-    edit_user() {
-      console.log("edit user");
-    },
-    del_user() {
-      console.log("del user");
+    set_reviewer(row) {
+      this.is_loading_users = true;
+      this.$http.put("/set_reviewer", { new_reviewer: row.id }).then(
+        res => {
+          if (res.data.code === 200) {
+            this.is_loading_users = false;
+            this.$message.success("提交成功");
+            row.role = "审核人员";
+          }
+          if (res.data.code === 401) {
+            this.is_loading_demands = false;
+            this.$message.warning("登录已过期，请重新登录");
+            this.$router.push("/login");
+          }
+        },
+        () => {
+          this.is_loading_demands = false;
+          this.$message.error("提交失败，请重试");
+        }
+      );
     },
     reset_pwd(row) {
       this.is_loading_users = true;
