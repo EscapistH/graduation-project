@@ -37,9 +37,7 @@
         @change="set_placeholder"
       ></el-switch>
       <el-button type="primary" @click="do_login" style="margin-left:1rem">登录</el-button>
-      <router-link to="/register">
-        <el-button type="info" style="margin-left:1rem">去注册</el-button>
-      </router-link>
+      <el-button type="info" style="margin-left:1rem" @click="$router.push('/register')">去注册</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -58,7 +56,9 @@ export default {
       },
 
       login_form_rules: {
-        username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
+        username: [
+          { required: true, message: "请输入用户名", trigger: "blur" }
+        ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
           {

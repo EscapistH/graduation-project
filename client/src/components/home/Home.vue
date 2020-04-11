@@ -30,7 +30,11 @@
       </div>
       <!-- 已登录显示发布和退出按钮否则显示登录和注册按钮 -->
       <div v-if="is_login">
-        <el-button type="primary" @click="open_pub_dialog" style="margin-right:0.55rem">发布需求</el-button>
+        <el-button
+          type="primary"
+          @click="pub_dialog_visible === true?pub_dialog_visible = false:pub_dialog_visible = true"
+          style="margin-right:0.55rem"
+        >发布需求</el-button>
         <!-- 发布需求的dialog -->
         <el-dialog
           title="发布需求"
@@ -68,9 +72,17 @@
         <el-dropdown split-button type="info" @click="do_logout">
           退出
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item @click.native="open_personal_info_dialog">修改个人信息</el-dropdown-item>
-            <el-dropdown-item v-if="personal_info_form.role === 0" @click.native="go_admin">管理页面</el-dropdown-item>
-            <el-dropdown-item v-if="personal_info_form.role === 1" @click.native="go_review">审核页面</el-dropdown-item>
+            <el-dropdown-item
+              @click.native="personal_info_dialog_visible === true?personal_info_dialog_visible = false:personal_info_dialog_visible = true"
+            >修改个人信息</el-dropdown-item>
+            <el-dropdown-item
+              v-if="personal_info_form.role === 0"
+              @click.native="$router.push('/admin')"
+            >管理页面</el-dropdown-item>
+            <el-dropdown-item
+              v-if="personal_info_form.role === 1"
+              @click.native="$router.push('/review')"
+            >审核页面</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
         <!-- 完善个人信息的dialog -->
@@ -114,8 +126,8 @@
         </el-dialog>
       </div>
       <div v-else>
-        <el-button type="primary" @click="go_login">去登录</el-button>
-        <el-button type="primary" @click="go_register">去注册</el-button>
+        <el-button type="primary" @click="$router.push('/login')">去登录</el-button>
+        <el-button type="primary" @click="$router.pushi('/register')">去注册</el-button>
       </div>
     </el-header>
     <router-view
@@ -202,24 +214,9 @@ export default {
       });
       this.$router.go(0);
     },
-    go_login() {
-      this.$router.push("/login");
-    },
-    go_register() {
-      this.$router.push("/register");
-    },
-    go_admin() {
-      this.$router.push("/admin");
-    },
-    go_review() {
-      this.$router.push("/review");
-    },
     get_active_path(path) {
       window.sessionStorage.active_path = path;
       this.active_path = path;
-    },
-    open_pub_dialog() {
-      this.pub_dialog_visible = true;
     },
     do_publish() {
       this.$refs.pub_form_ref.validate(valid => {
@@ -258,9 +255,6 @@ export default {
           this.pub_dialog_visible = false;
         })
         .catch(() => {});
-    },
-    open_personal_info_dialog() {
-      this.personal_info_dialog_visible = true;
     },
     do_update_personal_info() {
       this.$refs.personal_info_form_ref.validate(valid => {

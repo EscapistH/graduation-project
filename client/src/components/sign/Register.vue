@@ -64,9 +64,7 @@
     </el-form-item>
     <el-form-item class="btns">
       <el-button type="primary" @click="do_register" style="margin-left:1rem">注册</el-button>
-      <router-link to="/login">
-        <el-button type="info" style="margin-left:1rem">去登录</el-button>
-      </router-link>
+      <el-button type="info" style="margin-left:1rem" @click="$router.push('/login')">去登录</el-button>
     </el-form-item>
   </el-form>
 </template>
