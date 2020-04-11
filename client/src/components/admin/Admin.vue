@@ -22,10 +22,17 @@
           <el-table-column sortable prop="last_login_time" min-width="200" label="上次登录时间"></el-table-column>
           <el-table-column min-width="150" label="操作">
             <template slot-scope="scope">
-              <el-button-group>
-                <el-button @click="reset_pwd(scope.row)" type="warning" size="mini">重置密码</el-button>
-                <el-button @click="del_user(scope.row)" type="danger" size="mini">删除用户</el-button>
-              </el-button-group>
+              <el-popconfirm @onConfirm="reset_pwd(scope.row)" title="此操作会将密码重置为 12345678">
+                <el-button slot="reference" type="warning" size="mini">重置密码</el-button>
+              </el-popconfirm>
+              <el-popconfirm
+                @onConfirm="del_user(scope.row)"
+                title="确认删除此用户吗？"
+                icon="el-icon-warning"
+                iconColor="red"
+              >
+                <el-button slot="reference" type="danger" size="mini">删除用户</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -147,11 +154,9 @@ export default {
       console.log("del user");
     },
     reset_pwd(row) {
-      console.log(row, row.id);
       this.is_loading_users = true;
       this.$http.put("/reset_pwd", { u_id: row.id }).then(
         res => {
-          console.log(res);
           if (res.data.code === 200) {
             this.is_loading_users = false;
             this.$message.success("密码已重置为 12345678，请及时修改");
