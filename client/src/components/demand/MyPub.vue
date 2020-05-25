@@ -14,27 +14,34 @@
         <div class="card-box">
           <!-- 鼠标覆盖时出现卡片阴影 -->
           <el-card shadow="hover">
-            <!-- 卡片头部 -->
-            <div slot="header" class="card-header">
-              <!-- 卡片标题 -->
-              <span class="demand-title">{{demand.title}}</span>
-              <!-- tag 是否验证 -->
-              <el-tag
-                :type="demand.is_review===true?'success':'warning'"
-                size="mini"
-                effect="dark"
-                class="review-tag"
-              >{{demand.is_review===true?'已验证':'未验证'}}</el-tag>
-              <br />
-              <!-- 发布时间 -->
-              <span class="demand-pub-time">发布时间: {{demand.pub_time}}</span>
+            <!-- 卡片标题 -->
+            <div class="card-title">
+              <span class="hospital-name">{{demand.publisher}}</span>
+              <!-- tag 验证 -->
+              <el-tag type="success" size="mini" effect="plain" class="review-tag">已验证</el-tag>
+              <div class="card-address">{{address_split(demand.address)}}</div>
             </div>
             <!-- 卡片主体 -->
             <div class="card-content">
-              <el-table :data="demand.content">
-                <el-table-column label="需求物资" prop="name"></el-table-column>
-                <el-table-column label="需求数量" prop="num"></el-table-column>
-              </el-table>
+              <div v-for="(supply, index) in demand.supplies" :key="index" class="supply-item">
+                <div class="supply-name">{{supply.name}}</div>
+                <div class="supply-number">{{supply.number}}</div>
+              </div>
+            </div>
+            <!-- 卡片底部 -->
+            <div class="card-bottom">
+              <div
+                class="other-supply-num"
+                :hidden="demand.supplies.length > 3? false:true"
+              >+{{demand.supplies.length-3}} 项其他物资</div>
+              <div>
+                <div class="demand-info-btn">
+                  <el-button type="text" @click="open_demand_info(id)">查看详情</el-button>
+                </div>
+                <div class="donate-btn">
+                  <el-button @click="open_donation_dialog(id)">捐赠</el-button>
+                </div>
+              </div>
             </div>
             <div class="demand-operate">
               <el-button-group>

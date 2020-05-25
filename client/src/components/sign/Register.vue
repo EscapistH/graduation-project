@@ -9,19 +9,10 @@
   >
     <!-- 账号 -->
     <el-form-item prop="username">
-      <el-popover
-        ref="username_popover"
-        placement="top-start"
-        title="关于用户名"
-        width="200"
-        trigger="focus"
-        content="用户名是用来登录验证使用的，并非您的真实姓名。"
-      ></el-popover>
       <el-input
         prefix-icon="iconfont icon-user"
         v-model="reg_form.username"
-        placeholder="请输入用户名"
-        v-popover:username_popover
+        :placeholder="reg_as_holder"
       ></el-input>
     </el-form-item>
     <!-- 密码 -->
@@ -45,26 +36,25 @@
       ></el-input>
     </el-form-item>
     <!-- 手机号 -->
-    <el-form-item prop="phone">
-      <div slot="content"></div>
-      <el-popover
-        ref="phone_popover"
-        placement="bottom-start"
-        title="关于您的手机号码"
-        width="200"
-        trigger="focus"
-        content="除非经过您的允许, 否则您的手机号码将仅作为身份验证使用。"
-      ></el-popover>
-      <el-input
-        prefix-icon="iconfont icon-phone"
-        v-model="reg_form.phone"
-        v-popover:phone_popover
-        placeholder="请输入手机号"
-      ></el-input>
+    <el-form-item prop="phone" v-if="this.reg_form.reg_as === 'user'">
+      <el-input prefix-icon="iconfont icon-phone" v-model="reg_form.phone" placeholder="请输入手机号"></el-input>
+    </el-form-item>
+    <el-form-item prop="address" v-else>
+      <el-input prefix-icon="iconfont icon-home" v-model="reg_form.address" placeholder="请输入医院地址"></el-input>
     </el-form-item>
     <el-form-item class="btns">
+      <el-switch
+        v-model="reg_form.reg_as"
+        active-color="#409EFF"
+        inactive-color="#67C23A"
+        active-text="个人注册"
+        inactive-text="医院注册"
+        active-value="user"
+        inactive-value="hospital"
+        @change="set_placeholder"
+      ></el-switch>
       <el-button type="primary" @click="do_register" style="margin-left:1rem">注册</el-button>
-      <el-button type="info" style="margin-left:1rem" @click="$router.push('/login')">去登录</el-button>
+      <el-button type="text" style="margin-left:1rem" @click="$router.push('/login')">已有账号？</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -72,7 +62,7 @@
 <script>
 export default {
   data() {
-    var validate_check_pwd = (rule, value, callback) => {
+    let validate_check_pwd = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请再次输入密码"));
       } else if (value !== this.reg_form.password) {
@@ -83,14 +73,19 @@ export default {
     };
     return {
       is_loading: false,
+      reg_as_holder: "请输入医院名",
       reg_form: {
+        reg_as: "hospital",
         username: "",
         password: "",
         check_pwd: "",
-        phone: ""
+        phone: "",
+        address: ""
       },
       reg_form_rules: {
-        username: [{ required: true, message: "请输入账号", trigger: "blur" }],
+        username: [
+          { required: true, message: "请输入医院名", trigger: "blur" }
+        ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
           {
@@ -108,6 +103,9 @@ export default {
             message: "请输入正确的手机号，暂时只支持中国大陆的手机号",
             trigger: "blur"
           }
+        ],
+        address: [
+          { required: true, message: "请输入医院地址", trigger: "blur" }
         ]
       }
     };
@@ -120,7 +118,7 @@ export default {
         if (valid) {
           this.is_loading = true;
           // 向服务器发送登录请求
-          this.$http.post("/register", this.reg_form).then(
+          this.$http.post("/users", this.reg_form).then(
             res => {
               // console.log(res);
               if (res.data.code !== 200) {
@@ -139,6 +137,13 @@ export default {
           );
         }
       });
+    },
+    set_placeholder: function() {
+      this.reg_as_holder =
+        this.reg_form.reg_as === "hospital" ? "请输入医院名" : "请输入姓名";
+      this.reg_form_rules.username[0].message =
+        this.reg_form.reg_as === "hospital" ? "请输入医院名" : "请输入姓名";
+      // console.log(this.reg_form_rules.phone);
     }
   }
 };

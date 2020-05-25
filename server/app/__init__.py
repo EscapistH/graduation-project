@@ -10,7 +10,8 @@ from app.views import init_views
 from app.models.demands import Demands
 from app.models.users import Users
 from app.models.roles import Roles
-from app.models.auth import Auth
+from app.models.tokens import Tokens
+from app.models.supplies import Supplies
 
 
 def create_app(conf='development'):

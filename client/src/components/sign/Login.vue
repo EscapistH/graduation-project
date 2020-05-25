@@ -11,7 +11,7 @@
       <el-input
         prefix-icon="iconfont icon-user"
         v-model="login_form.username"
-        :placeholder="logby_holder"
+        :placeholder="log_as_holder"
       ></el-input>
     </el-form-item>
     <!-- 密码 -->
@@ -27,17 +27,17 @@
     <el-form-item class="btns">
       <!-- 登录方式选择开关 -->
       <el-switch
-        v-model="login_form.logby"
+        v-model="login_form.log_as"
         active-color="#409EFF"
         inactive-color="#67C23A"
-        active-text="手机号登录"
-        inactive-text="用户名登录"
-        active-value="phone"
-        inactive-value="username"
+        active-text="个人登录"
+        inactive-text="医院登录"
+        active-value="user"
+        inactive-value="hospital"
         @change="set_placeholder"
       ></el-switch>
       <el-button type="primary" @click="do_login" style="margin-left:1rem">登录</el-button>
-      <el-button type="info" style="margin-left:1rem" @click="$router.push('/register')">去注册</el-button>
+      <el-button type="text" style="margin-left:1rem" @click="$router.push('/register')">还没有账号？</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -47,17 +47,17 @@ export default {
   data() {
     return {
       is_loading: false,
-      logby_holder: "请输入用户名",
+      log_as_holder: "请输入医院名",
 
       login_form: {
-        logby: "username",
+        log_as: "hospital",
         username: "",
         password: ""
       },
 
       login_form_rules: {
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" }
+          { required: true, message: "请输入医院名", trigger: "blur" }
         ],
         password: [
           { required: true, message: "请输入密码", trigger: "blur" },
@@ -79,7 +79,7 @@ export default {
         if (valid) {
           this.is_loading = true;
           // 向服务器发送登录请求
-          this.$http.post("/login", this.login_form).then(
+          this.$http.post("/users/login", this.login_form).then(
             res => {
               // console.log(res);
               if (res.data.code !== 200) {
@@ -87,15 +87,14 @@ export default {
                 return this.$message.error("账号或密码错误");
               }
               // 保存token和uid
-              window.sessionStorage.setItem("token", res.data.data[0].token);
-              window.sessionStorage.setItem("uid", res.data.data[0].id);
+              window.sessionStorage.setItem(
+                "user_info",
+                JSON.stringify(res.data.data[0])
+              );
+              // window.sessionStorage.setItem("uid", res.data.data[0].id);
               // 跳转到主页
               this.$router.push("/home");
-              if (res.data.data[0].name === null) {
-                this.$message.success("欢迎回来 " + res.data.data[0].nick);
-              } else {
-                this.$message.success("欢迎回来 " + res.data.data[0].name);
-              }
+              this.$message.success("欢迎回来 " + res.data.data[0].name);
             },
             // 登录超时处理
             () => {
@@ -106,11 +105,13 @@ export default {
         }
       });
     },
+
+    // 设置登录框的placeholder
     set_placeholder: function() {
-      this.logby_holder =
-        this.login_form.logby === "username" ? "请输入用户名" : "请输入手机号";
+      this.log_as_holder =
+        this.login_form.log_as === "hospital" ? "请输入医院名" : "请输入手机号";
       this.login_form_rules.username[0].message =
-        this.login_form.logby === "username" ? "请输入用户名" : "请输入手机号";
+        this.login_form.log_as === "hospital" ? "请输入医院名" : "请输入手机号";
     }
   }
 };

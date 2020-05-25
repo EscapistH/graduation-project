@@ -15,17 +15,17 @@
           text-color="#fff"
           active-text-color="#ffd04b"
           :router="true"
-          :default-active="active_path"
+          default-active="/demands"
         >
-          <el-menu-item index="/demands" @click="get_active_path('/demands')">全部需求</el-menu-item>
-          <el-submenu index="2">
-            <template slot="title">我的需求</template>
-            <el-menu-item index="/my_pub_demands" @click="get_active_path('/my_pub_demands')">我发布的需求</el-menu-item>
-            <el-menu-item
-              index="/my_cancel_demands"
-              @click="get_active_path('/my_cancel_demands')"
-            >我撤销的需求</el-menu-item>
-          </el-submenu>
+          <el-menu-item index="/demands">全部需求</el-menu-item>
+          <el-menu-item
+            index="/my_demands"
+            v-if="logged_user_info && logged_user_info.role === 3"
+          >我的需求</el-menu-item>
+          <el-menu-item
+            index="/my_donations"
+            v-if="logged_user_info && logged_user_info.role === 4"
+          >我的捐赠</el-menu-item>
         </el-menu>
       </div>
       <!-- 已登录显示发布和退出按钮否则显示登录和注册按钮 -->
@@ -34,105 +34,56 @@
           type="primary"
           @click="pub_dialog_visible === true?pub_dialog_visible = false:pub_dialog_visible = true"
           style="margin-right:0.55rem"
+          v-if="logged_user_info && logged_user_info.role === 3"
         >发布需求</el-button>
-        <!-- 发布需求的dialog -->
-        <el-dialog
-          title="发布需求"
-          :visible.sync="pub_dialog_visible"
-          width="30%"
-          :before-close="handle_close"
-          v-loading="is_publishing"
-        >
-          <!-- 需求表单 -->
-          <el-form
-            :model="pub_demand_form"
-            label-width="8rem"
-            label-position="left"
-            ref="pub_form_ref"
-            :rules="pub_demand_form_rules"
-          >
-            <el-form-item label="所属医院或单位" prop="title">
-              <el-input v-model="pub_demand_form.title" placeholder="请输入所在医院或单位的全称"></el-input>
-            </el-form-item>
-            <el-form-item v-for="(d, name) in pub_demand_form.content" :key="name" :label="d.name">
-              <el-input
-                v-model="d.num"
-                :type="d.name === '其他'?'textarea':'text'"
-                rows="5"
-                class="demand-num"
-                :placeholder="d.name === '其他'?'有其他的未在上方列出的需求可以写在这里':''"
-              ></el-input>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button type="success" @click="do_publish">发布</el-button>
-          </div>
-        </el-dialog>
+        <el-button
+          type="info"
+          @click="do_logout"
+          v-if="logged_user_info && (logged_user_info.role === 3 || logged_user_info.role === 4)"
+        >退出</el-button>
         <!-- 下拉按钮组 -->
-        <el-dropdown split-button type="info" @click="do_logout">
+        <el-dropdown split-button type="info" @click="do_logout" v-else>
           退出
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item
-              @click.native="personal_info_dialog_visible === true?personal_info_dialog_visible = false:personal_info_dialog_visible = true"
-            >修改个人信息</el-dropdown-item>
-            <el-dropdown-item
-              v-if="personal_info_form.role === 0"
+              v-if="logged_user_info && logged_user_info.role === 1"
               @click.native="$router.push('/admin')"
             >管理页面</el-dropdown-item>
             <el-dropdown-item
-              v-if="personal_info_form.role === 1"
+              v-if="logged_user_info && logged_user_info.role === 2"
               @click.native="$router.push('/review')"
             >审核页面</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-        <!-- 完善个人信息的dialog -->
-        <el-dialog
-          title="修改个人信息"
-          :visible.sync="personal_info_dialog_visible"
-          width="30%"
-          :before-close="handle_close"
-          v-loading="is_updating"
-        >
-          <!-- 个人信息表单 -->
-          <el-form
-            :model="personal_info_form"
-            label-width="8rem"
-            label-position="left"
-            ref="personal_info_form_ref"
-            :rules="personal_info_form_rule"
-          >
-            <el-form-item label="用户名">
-              <el-input :disabled="true" v-model="personal_info_form.nick"></el-input>
-            </el-form-item>
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model="personal_info_form.name"></el-input>
-            </el-form-item>
-            <el-form-item label="性别" prop="gender">
-              <el-radio-group v-model="personal_info_form.gender">
-                <el-radio-button label="男"></el-radio-button>
-                <el-radio-button label="女"></el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="手机号" prop="phone">
-              <el-input v-model="personal_info_form.phone"></el-input>
-            </el-form-item>
-            <el-form-item label="邮箱" prop="email">
-              <el-input v-model="personal_info_form.email"></el-input>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button type="success" @click="do_update_personal_info">提交修改</el-button>
-          </div>
-        </el-dialog>
       </div>
       <div v-else>
         <el-button type="primary" @click="$router.push('/login')">去登录</el-button>
-        <el-button type="primary" @click="$router.pushi('/register')">去注册</el-button>
+        <el-button type="primary" @click="$router.push('/register')">去注册</el-button>
       </div>
     </el-header>
-    <router-view
-      :now_login_user_name="personal_info_form.name===null?personal_info_form.nick:personal_info_form.name"
-    ></router-view>
+    <!-- 发布需求的dialog -->
+    <el-dialog
+      title="发布需求"
+      :visible.sync="pub_dialog_visible"
+      width="50%"
+      :before-close="handle_close"
+      v-loading="is_publishing"
+    >
+      <!-- 需求表单 -->
+      <el-form :model="pub_demand_form">
+        <el-form-item v-for="(supply, index) in pub_demand_form.supplies" :key="index">
+          <el-input v-model="supply.name" placeholder="物资" class="supply-name"></el-input>
+          <el-input v-model="supply.specification" placeholder="规格" class="supply-specification"></el-input>
+          <el-input v-model="supply.number" placeholder="数量, 不限请输入-1" class="supply-number"></el-input>
+          <el-button @click="remove_supply(supply)" class="supply-remove-btn">删除</el-button>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="add_supply">新增物资</el-button>
+        <el-button type="success" @click="do_publish">发布</el-button>
+      </div>
+    </el-dialog>
+    <router-view :logged_user_info="logged_user_info"></router-view>
     <!-- 主体部分 -->
   </el-container>
 </template>
@@ -141,72 +92,27 @@
 export default {
   data() {
     return {
-      active_path: "/demands",
-      is_login: window.sessionStorage.getItem("token") ? true : false,
+      is_login: window.sessionStorage.getItem("user_info") ? true : false,
       pub_dialog_visible: false,
       is_publishing: false,
-      is_updating: false,
+
       pub_demand_form: {
-        title: "",
-        content: [
-          { name: "口罩", num: "0" },
-          { name: "防护服", num: "0" },
-          { name: "医用酒精", num: "0" },
-          { name: "消毒液", num: "0" },
-          { name: "其他", num: "" }
-        ],
-        publisher: window.sessionStorage.getItem("uid")
-      },
-      pub_demand_form_rules: {
-        title: [
-          { required: true, message: "请输入医院或单位名称", trigger: "blur" }
+        publisher: null,
+        supplies: [
+          { name: "口罩", specification: "", number: "" },
+          { name: "防护服", specification: "", number: "" }
         ]
       },
-      personal_info_dialog_visible: false,
-      personal_info_form: {
-        uid: window.sessionStorage.getItem("uid"),
-        nick: null,
-        name: null,
-        gender: null,
-        phone: null,
-        email: null,
-        role: null
-      },
-      personal_info_form_rule: {
-        name: [{ required: true, message: "请输入真实姓名", trigger: "blur" }],
-        gender: [{ required: true, message: "请选择性别", trigger: "change" }],
-        phone: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
-          {
-            pattern: /^1[34578]\d{9}$/,
-            message: "请输入正确的手机号，暂时只支持中国大陆的手机号",
-            trigger: "blur"
-          }
-        ]
-      }
+      // 接收登录用户信息
+      logged_user_info: sessionStorage.getItem("user_info")
+        ? JSON.parse(sessionStorage.getItem("user_info"))
+        : null
     };
   },
-  created() {
-    this.get_user_info();
-    this.active_path = window.sessionStorage.getItem("active_path");
-    // 检查是否完善个人信息
-    setTimeout(() => {
-      if (
-        window.sessionStorage.getItem("token") !== null &&
-        this.personal_info_form.name === null
-      ) {
-        this.$notify.info({
-          title: "请完善个人信息",
-          message:
-            "您的个人信息还不完善，为了方便使用本系统，请在这里选择修改个人信息进行完善"
-        });
-      }
-    }, 2000);
-  },
+
   methods: {
     do_logout() {
-      window.sessionStorage.removeItem("token");
-      window.sessionStorage.removeItem("uid");
+      window.sessionStorage.removeItem("user_info");
       this.active_path = "/demands";
       this.$message({
         message: "注销成功",
@@ -214,39 +120,35 @@ export default {
       });
       this.$router.go(0);
     },
-    get_active_path(path) {
-      window.sessionStorage.active_path = path;
-      this.active_path = path;
-    },
+
     do_publish() {
-      this.$refs.pub_form_ref.validate(valid => {
-        if (valid) {
+      this.is_publishing = true;
+      this.pub_demand_form.publisher = this.logged_user_info.id;
+      // console.log(this.pub_demand_form);
+      this.$http.post("/demands", this.pub_demand_form).then(
+        res => {
+          // console.log(res);
           this.is_publishing = true;
-          this.$http.post("/publish_demand", this.pub_demand_form).then(
-            res => {
-              // console.log(res);
-              this.is_publishing = true;
-              if (res.data.code === 200) {
-                this.is_publishing = false;
-                this.$message.success("发布需求成功");
-                this.pub_dialog_visible = false;
-                this.is_publishing = false;
-                this.$router.go(0);
-              }
-              if (res.data.code === 401) {
-                this.is_publishing = false;
-                this.$message.waring("登录已过期，请重新登录");
-                this.$router.push("/login");
-              }
-            },
-            () => {
-              this.is_modifying = false;
-              this.$message.error("请求失败，请重试");
-            }
-          );
+          if (res.data.code === 200) {
+            this.is_publishing = false;
+            this.$message.success("发布需求成功");
+            this.pub_dialog_visible = false;
+            this.is_publishing = false;
+            this.$router.go(0);
+          }
+          if (res.data.code === 401) {
+            this.is_publishing = false;
+            this.$message.waring("登录已过期，请重新登录");
+            this.$router.push("/login");
+          }
+        },
+        () => {
+          this.is_modifying = false;
+          this.$message.error("请求失败，请重试");
         }
-      });
+      );
     },
+
     handle_close(done) {
       this.$confirm("还未提交修改,确认关闭吗?")
         .then(() => {
@@ -256,46 +158,18 @@ export default {
         })
         .catch(() => {});
     },
-    do_update_personal_info() {
-      this.$refs.personal_info_form_ref.validate(valid => {
-        if (valid) {
-          console.log(this.personal_info_form);
-          this.is_updating = true;
-          this.$http
-            .put(
-              "/users/" + this.personal_info_form.uid,
-              this.personal_info_form
-            )
-            .then(res => {
-              if (res.data.code === 200) {
-                this.is_updating = false;
-                this.$message.success("修改成功");
-                this.personal_info_dialog_visible = false;
-              }
-              if (res.data.code === 401) {
-                this.is_updating = false;
-                this.personal_info_dialog_visible = false;
-                this.$message.waring("登录失效，请重新登录");
-                this.$router.push("/login");
-              }
-              if (res.data.code === 500) {
-                this.is_updating = false;
-                this.$message.error(res.data.data[0].msg);
-              }
-            })
-            .catch(() => {});
-        }
+    add_supply() {
+      this.pub_demand_form.supplies.push({
+        name: "",
+        specification: "",
+        number: ""
       });
     },
-    get_user_info() {
-      this.$http.get("/users/" + this.personal_info_form.uid).then(res => {
-        this.personal_info_form.nick = res.data.data[0].nick;
-        this.personal_info_form.name = res.data.data[0].name;
-        this.personal_info_form.gender = res.data.data[0].gender;
-        this.personal_info_form.phone = res.data.data[0].phone;
-        this.personal_info_form.email = res.data.data[0].email;
-        this.personal_info_form.role = res.data.data[0].role;
-      });
+    remove_supply(item) {
+      let index = this.pub_demand_form.supplies.indexOf(item);
+      if (index !== -1) {
+        this.pub_demand_form.supplies.splice(index, 1);
+      }
     }
   }
 };
@@ -329,5 +203,24 @@ export default {
 
 .el-main {
   background-color: #f5f7fa;
+}
+
+.supply-name {
+  width: 20%;
+  margin-left: 5%;
+}
+
+.supply-specification {
+  width: 40%;
+  margin-left: 1%;
+}
+
+.supply-number {
+  width: 20%;
+  margin-left: 1%;
+}
+
+.supply-remove-btn {
+  margin-left: 1%;
 }
 </style>

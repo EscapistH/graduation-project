@@ -18,8 +18,8 @@ axios.defaults.baseURL = 'http://localhost:5000/api'
 // 请求时在请求头带上token和uid
 axios.interceptors.request.use(config => {
   // console.log(config)
-  config.headers.token = window.sessionStorage.getItem('token')
-  config.headers.uid = window.sessionStorage.getItem('uid')
+  config.headers.token = window.sessionStorage.getItem('user_info') ? JSON.parse(window.sessionStorage.getItem('user_info')).token : null
+  config.headers.uid = window.sessionStorage.getItem('user_info') ? JSON.parse(window.sessionStorage.getItem('user_info')).id : null
   return config
 })
 
